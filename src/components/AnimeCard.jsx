@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '../features/watchlistSlice';
+import { Link } from 'react-router-dom';  // ✅ import Link
 
 const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) => {
   const dispatch = useDispatch();
@@ -21,8 +22,11 @@ const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) =>
         <button style={styles.removeButton} onClick={handleRemove}>✖</button>
       )}
 
-      <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
-      <h3 style={styles.title}>{anime.title}</h3>
+      {/* ✅ Link wraps image + title */}
+      <Link to={`/anime/${anime.mal_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
+        <h3 style={styles.title}>{anime.title}</h3>
+      </Link>
 
       {showAddButton && (
         <button
