@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { addToWatchlist } from '../features/watchlistSlice';
+import { addToWatchlist, removeFromWatchlist } from '../features/watchlistSlice';
 
-const AnimeCard = ({ anime, showAddButton = true }) => {
+const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) => {
   const dispatch = useDispatch();
   const [added, setAdded] = useState(false);
 
@@ -11,8 +11,16 @@ const AnimeCard = ({ anime, showAddButton = true }) => {
     setAdded(true);
   };
 
+  const handleRemove = () => {
+    dispatch(removeFromWatchlist(anime.mal_id));
+  };
+
   return (
     <div style={styles.card}>
+      {showRemoveButton && (
+        <button style={styles.removeButton} onClick={handleRemove}>✖</button>
+      )}
+
       <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
       <h3 style={styles.title}>{anime.title}</h3>
 
@@ -37,7 +45,8 @@ const styles = {
     margin: '1rem',
     width: '200px',
     textAlign: 'center',
-    color: '#fff'
+    color: '#fff',
+    position: 'relative'
   },
   image: {
     width: '100%',
@@ -68,6 +77,19 @@ const styles = {
     color: '#fff',
     cursor: 'not-allowed',
     transition: 'all 0.3s ease'
+  },
+  removeButton: {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    background: '#ff1744',
+    border: 'none',
+    borderRadius: '50%',
+    width: '28px',
+    height: '28px',
+    color: '#fff',
+    fontSize: '16px',
+    cursor: 'pointer'
   }
 };
 
