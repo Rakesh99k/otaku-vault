@@ -1,19 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToWatchlist } from '../features/watchlistSlice';
 
-const AnimeCard = ({ anime }) => {
+const AnimeCard = ({ anime, showAddButton = true }) => {
   const dispatch = useDispatch();
+  const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
     dispatch(addToWatchlist(anime));
+    setAdded(true);
   };
 
   return (
     <div style={styles.card}>
       <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
       <h3 style={styles.title}>{anime.title}</h3>
-      <button style={styles.button} onClick={handleAdd}>Add to Watchlist</button>
+
+      {showAddButton && (
+        <button
+          style={added ? styles.addedButton : styles.button}
+          onClick={handleAdd}
+          disabled={added}
+        >
+          {added ? 'Added' : 'Add to Watchlist'}
+        </button>
+      )}
     </div>
   );
 };
@@ -45,7 +56,18 @@ const styles = {
     padding: '0.4rem 0.8rem',
     borderRadius: '6px',
     color: '#fff',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.3s ease'
+  },
+  addedButton: {
+    marginTop: '0.5rem',
+    background: '#616161',
+    border: 'none',
+    padding: '0.4rem 0.8rem',
+    borderRadius: '6px',
+    color: '#fff',
+    cursor: 'not-allowed',
+    transition: 'all 0.3s ease'
   }
 };
 
