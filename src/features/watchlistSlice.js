@@ -1,27 +1,29 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// Initial state for the watchlist
+// Load watchlist from localStorage
+const storedWatchlist = localStorage.getItem('animeWatchlist');
 const initialState = {
-  watchlist: [],
+  watchlist: storedWatchlist ? JSON.parse(storedWatchlist) : []
 };
 
-export const watchlistSlice = createSlice({
+const watchlistSlice = createSlice({
   name: 'watchlist',
   initialState,
   reducers: {
     addToWatchlist: (state, action) => {
       state.watchlist.push(action.payload);
+      // Save to localStorage
+      localStorage.setItem('animeWatchlist', JSON.stringify(state.watchlist));
     },
     removeFromWatchlist: (state, action) => {
       state.watchlist = state.watchlist.filter(
         (anime) => anime.mal_id !== action.payload
       );
-    },
-  },
+      // Save updated list to localStorage
+      localStorage.setItem('animeWatchlist', JSON.stringify(state.watchlist));
+    }
+  }
 });
 
-// Export actions
 export const { addToWatchlist, removeFromWatchlist } = watchlistSlice.actions;
-
-// Export reducer
 export default watchlistSlice.reducer;
