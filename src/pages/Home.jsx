@@ -5,25 +5,34 @@ import AnimeCard from '../components/AnimeCard';
 const Home = () => {
   const [animes, setAnimes] = useState([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
 
- const fetchAnimes = async (query = '') => {
-  try {
-    const response = query
-      ? await axios.get(`https://api.jikan.moe/v4/anime?q=${query}&order_by=score`)
-      : await axios.get('https://api.jikan.moe/v4/top/anime');
+  const fetchAnimes = async (query = '') => {
+    try {
+      setLoading(true);
+      setAnimes([]); // Clear previous data immediately
 
-    // Deduplicate by mal_id
-    const uniqueAnimes = response.data.data.filter(
-      (anime, index, self) =>
-        index === self.findIndex((a) => a.mal_id === anime.mal_id)
-    );
+      const response = query
+        ? await axios.get(`https://api.jikan.moe/v4/anime?q=${query}&order_by=score`)
+        : await axios.get('https://api.jikan.moe/v4/top/anime');
 
-    setAnimes(uniqueAnimes);
-  } catch (error) {
-    console.error("Error fetching anime data", error);
-  }
-};
+      console.log('Response data:', response.data.data); // Debug log
 
+      const animeData = response.data.data || [];
+
+      const uniqueAnimes = animeData.filter(
+        (anime, index, self) =>
+          index === self.findIndex((a) => a.mal_id === anime.mal_id)
+      );
+
+      setAnimes(uniqueAnimes);
+    } catch (error) {
+      console.error('Error fetching anime data', error);
+      setAnimes([]); // fallback to empty
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAnimes();
@@ -47,15 +56,24 @@ const Home = () => {
           style={styles.input}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <button onClick={handleSearch} style={styles.searchButton}>Search</button>
+        <button onClick={handleSearch} style={styles.searchButton}>
+          Search
+        </button>
       </div>
 
-      {/* Anime Cards */}
-      <div style={styles.grid}>
-        {animes.map((anime) => (
-          <AnimeCard key={anime.mal_id} anime={anime} />
-        ))}
-      </div>
+
+      {/* 🔄 Loader / No Results / Anime Grid */}
+      {loading ? (
+        <p style={{ marginTop: '2rem', fontSize: '1.2rem', color: 'orange' }}>Loading...</p>
+      ) : animes.length === 0 ? (
+        <p style={{ marginTop: '2rem', fontSize: '1.2rem', color: 'red' }}>No results found.</p>
+      ) : (
+        <div style={styles.grid}>
+          {animes.map((anime) => (
+            <AnimeCard key={anime.mal_id} anime={anime} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
