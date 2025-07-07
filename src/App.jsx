@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Watchlist from './pages/Watchlist';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -8,7 +9,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        {/* We'll add Watchlist route later */}
+        <Route path="/watchlist" element={<Watchlist />} />
       </Routes>
     </Router>
   );
