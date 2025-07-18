@@ -11,10 +11,12 @@ const watchlistSlice = createSlice({
   initialState,
   reducers: {
     addToWatchlist: (state, action) => {
-      state.watchlist.push(action.payload);
-      // Save to localStorage
-      localStorage.setItem('animeWatchlist', JSON.stringify(state.watchlist));
-    },
+  const exists = state.watchlist.some(anime => anime.mal_id === action.payload.mal_id);
+  if (!exists) {
+    state.watchlist.push(action.payload);
+    localStorage.setItem('animeWatchlist', JSON.stringify(state.watchlist));
+  }
+},
     removeFromWatchlist: (state, action) => {
       state.watchlist = state.watchlist.filter(
         (anime) => anime.mal_id !== action.payload

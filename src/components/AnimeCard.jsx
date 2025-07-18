@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '../features/watchlistSlice';
-import { Link } from 'react-router-dom';  // ✅ import Link
+import { Link } from 'react-router-dom';
 
 const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) => {
   const dispatch = useDispatch();
-  const [added, setAdded] = useState(false);
+  const watchlist = useSelector((state) => state.watchlist.watchlist || []);
+
+  const isAlreadyAdded = watchlist.some(item => item.mal_id === anime.mal_id);
 
   const handleAdd = () => {
-    dispatch(addToWatchlist(anime));
-    setAdded(true);
+    if (!isAlreadyAdded) {
+      dispatch(addToWatchlist(anime));
+    }
   };
 
   const handleRemove = () => {
@@ -22,7 +25,6 @@ const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) =>
         <button style={styles.removeButton} onClick={handleRemove}>✖</button>
       )}
 
-      {/* ✅ Link wraps image + title */}
       <Link to={`/details/${anime.mal_id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
         <h3 style={styles.title}>{anime.title}</h3>
@@ -30,11 +32,11 @@ const AnimeCard = ({ anime, showAddButton = true, showRemoveButton = false }) =>
 
       {showAddButton && (
         <button
-          style={added ? styles.addedButton : styles.button}
+          style={isAlreadyAdded ? styles.addedButton : styles.button}
           onClick={handleAdd}
-          disabled={added}
+          disabled={isAlreadyAdded}
         >
-          {added ? 'Added' : 'Add to Watchlist'}
+          {isAlreadyAdded ? 'Added' : 'Add to Watchlist'}
         </button>
       )}
     </div>
