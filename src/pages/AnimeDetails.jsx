@@ -24,6 +24,34 @@ const AnimeDetails = () => {
     fetchAnimeDetails();
   }, [id]);
 
+  // 💡 Inject mobile responsive styles
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media (max-width: 768px) {
+        .details-container {
+          flex-direction: column !important;
+        }
+
+        .anime-info {
+          padding: 0 !important;
+          border: none !important;
+        }
+
+        .anime-image {
+          width: 100% !important;
+          height: auto;
+        }
+
+        .anime-synopsis {
+          padding: 0 0.5rem;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   if (loading) return <p style={{ color: 'orange' }}>Loading details...</p>;
   if (!anime) return <p style={{ color: 'red' }}>Anime not found.</p>;
 
@@ -31,10 +59,15 @@ const AnimeDetails = () => {
     <div style={styles.container}>
       <Link to="/" style={styles.backLink}>← Back to Home</Link>
 
-      <div style={styles.detailsContainer}>
-        <img src={anime.images.jpg.image_url} alt={anime.title} style={styles.image} />
+      <div style={styles.detailsContainer} className="details-container">
+        <img
+          src={anime.images.jpg.image_url}
+          alt={anime.title}
+          style={styles.image}
+          className="anime-image"
+        />
 
-        <div style={styles.info}>
+        <div style={styles.info} className="anime-info">
           <h1 style={{ marginBottom: '1rem' }}>{anime.title}</h1>
           <p><strong>Episodes:</strong> {anime.episodes}</p>
           <p><strong>Status:</strong> {anime.status}</p>
@@ -54,7 +87,7 @@ const AnimeDetails = () => {
         </div>
       </div>
 
-      <div style={styles.synopsis}>
+      <div style={styles.synopsis} className="anime-synopsis">
         <h2 style={{ marginBottom: '0.5rem' }}>Synopsis:</h2>
         <p>{anime.synopsis}</p>
       </div>
@@ -78,6 +111,8 @@ const styles = {
   },
   detailsContainer: {
     display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: '2rem',
     marginBottom: '2rem',
     alignItems: 'flex-start'
@@ -87,13 +122,13 @@ const styles = {
     borderRadius: '10px'
   },
   info: {
-  flex: 1,
-  fontSize: '1.05rem',
-  lineHeight: '1.5',
-  padding: '1rem',
-  border: '1px solid #333',
-  borderRadius: '8px'
-},
+    flex: 1,
+    fontSize: '1.05rem',
+    lineHeight: '1.5',
+    padding: '1rem',
+    border: '1px solid #333',
+    borderRadius: '8px'
+  },
   link: {
     color: '#00aced',
     marginTop: '1rem',
