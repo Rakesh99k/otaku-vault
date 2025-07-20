@@ -6,7 +6,7 @@ const Navbar = () => {
     <nav style={styles.nav}>
       <h1 style={styles.logo}>OtakuVault</h1>
       <div>
-        <Link to="/" style={styles.link}>Home</Link>
+        <Link to="/?reset=true" style={styles.link}>Home</Link> {/* 👈 Updated */}
         <Link to="/watchlist" style={styles.link}>Watchlist</Link>
       </div>
     </nav>
