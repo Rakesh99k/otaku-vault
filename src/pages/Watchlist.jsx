@@ -13,7 +13,7 @@ const Watchlist = () => {
       ) : (
         <div style={styles.grid}>
           {watchlist.map((anime) => (
-            <AnimeCard key={anime.mal_id} anime={anime} showAddButton={false} showRemoveButton={true} />
+            <AnimeCard key={anime.id} anime={anime} showAddButton={false} showRemoveButton={true} />
           ))}
         </div>
       )}
