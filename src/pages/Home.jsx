@@ -39,18 +39,24 @@ const Home = () => {
     }
   };
 
-  // 👇 THIS IS IMPORTANT
+  // ✅ FIXED: Handles "?reset=true" when the page is opened directly
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const shouldReset = params.get('reset') === 'true';
 
     if (shouldReset) {
       setSearch('');
+      // ✅ DELAY execution slightly to wait until component is ready
+      setTimeout(() => {
+        fetchAnimes('');
+        // ✅ Removes reset param from the URL
+        navigate('/', { replace: true });
+      }, 0);
+    } else {
+      // ✅ Load top anime by default when there's no reset param
       fetchAnimes('');
-      // 👇 remove reset from URL after it's used
-      navigate('/', { replace: true });
     }
-  }, [location.search]); // 👈 DEPENDENCY IS HERE
+  }, [location.search]);
 
   return (
     <div style={styles.container}>
