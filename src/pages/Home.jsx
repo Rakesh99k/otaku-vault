@@ -1,89 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import AnimeCard from '../components/AnimeCard';
-import { useLocation, useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [animes, setAnimes] = useState([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [animeList, setAnimeList] = useState([]);
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
 
-  const fetchAnimes = async (query = '') => {
-    try {
-      setLoading(true);
-      const url = query
-        ? `https://api.jikan.moe/v4/anime?q=${query}&order_by=score`
-        : `https://api.jikan.moe/v4/top/anime`;
-      const response = await axios.get(url);
-      const data = response.data.data || [];
+  const fetchAnime = async (searchTerm) => {
+    setSearching(true);
+    const query = `
+      query ($search: String) {
+        Page(perPage: 20) {
+          media(search: $search, type: ANIME) {
+            id
+            title {
+              romaji
+            }
+            coverImage {
+              large
+            }
+          }
+        }
+      }
+    `;
 
-      const uniqueAnimes = data.filter(
-        (anime, index, self) =>
-          index === self.findIndex((a) => a.mal_id === anime.mal_id)
-      );
+    const variables = { search: searchTerm };
 
-      setAnimes(uniqueAnimes);
-    } catch (error) {
-      console.error('Error fetching anime:', error);
-      setAnimes([]);
-    } finally {
-      setLoading(false);
-    }
+    const response = await fetch('https://graphql.anilist.co', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables }),
+    });
+
+    const data = await response.json();
+    setAnimeList(data.data.Page.media);
+    setSearching(false);
   };
 
-  const handleSearch = () => {
-    if (search.trim()) {
-      fetchAnimes(search);
-    }
-  };
-
-  // ✅ FIXED: Handles "?reset=true" when the page is opened directly
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const shouldReset = params.get('reset') === 'true';
+    fetchAnime('Naruto'); // default search
+  }, []);
 
-    if (shouldReset) {
-      setSearch('');
-      // ✅ DELAY execution slightly to wait until component is ready
-      setTimeout(() => {
-        fetchAnimes('');
-        // ✅ Removes reset param from the URL
-        navigate('/', { replace: true });
-      }, 0);
-    } else {
-      // ✅ Load top anime by default when there's no reset param
-      fetchAnimes('');
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (query.trim() !== '') {
+      fetchAnime(query);
     }
-  }, [location.search]);
+  };
 
   return (
-    <div style={styles.container}>
-      <h1>Anime Explorer</h1>
-
-      <div style={styles.searchContainer}>
+    <div style={{ padding: '2rem', backgroundColor: '#1c1c2b', minHeight: '100vh', color: 'white' }}>
+      <form onSubmit={handleSearch} style={{ marginBottom: '2rem', textAlign: 'center' }}>
         <input
           type="text"
           placeholder="Search anime..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          style={styles.input}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={searchInputStyle}
         />
-        <button onClick={handleSearch} style={styles.searchButton}>
+        <button type="submit" style={searchButtonStyle}>
           Search
         </button>
-      </div>
+      </form>
 
-      {loading ? (
-        <p style={styles.message}>Loading...</p>
-      ) : animes.length === 0 ? (
-        <p style={styles.message}>No anime found.</p>
+      {searching ? (
+        <h2 style={{ textAlign: 'center' }}>Searching...</h2>
       ) : (
-        <div style={styles.grid}>
-          {animes.map((anime) => (
-            <AnimeCard key={anime.mal_id} anime={anime} />
+        <div style={cardGridStyle}>
+          {animeList.map((anime) => (
+            <AnimeCard key={anime.id} anime={anime} />
           ))}
         </div>
       )}
@@ -91,42 +76,29 @@ const Home = () => {
   );
 };
 
-const styles = {
-  container: {
-    padding: '2rem',
-    color: '#fff',
-  },
-  searchContainer: {
-    display: 'flex',
-    gap: '0.5rem',
-    marginBottom: '1.5rem',
-  },
-  input: {
-    flex: 1,
-    padding: '0.5rem 1rem',
-    borderRadius: '6px',
-    border: '1px solid #ccc',
-    fontSize: '1rem',
-  },
-  searchButton: {
-    padding: '0.5rem 1.2rem',
-    background: '#2196f3',
-    border: 'none',
-    color: '#fff',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '1rem',
-  },
-  grid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '1rem',
-  },
-  message: {
-    marginTop: '2rem',
-    fontSize: '1.2rem',
-    color: 'orange',
-  },
+const searchInputStyle = {
+  padding: '0.7rem',
+  width: '260px',
+  borderRadius: '8px',
+  border: '1px solid #ccc',
+  fontSize: '1rem',
+  marginRight: '0.5rem',
+};
+
+const searchButtonStyle = {
+  padding: '0.7rem 1.2rem',
+  background: '#4b6cb7',
+  color: 'white',
+  border: 'none',
+  borderRadius: '8px',
+  cursor: 'pointer',
+  fontWeight: 'bold',
+};
+
+const cardGridStyle = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  justifyContent: 'center',
 };
 
 export default Home;
