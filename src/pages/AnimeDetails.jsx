@@ -10,9 +10,46 @@ const AnimeDetails = () => {
   const fetchAnimeDetails = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`https://api.jikan.moe/v4/anime/${id}`);
-      console.log('Anime details:', response.data.data);
-      setAnime(response.data.data);
+
+      const query = `
+        query ($id: Int) {
+          Media(id: $id, type: ANIME) {
+            id
+            title {
+              romaji
+              english
+              native
+            }
+            coverImage {
+              large
+            }
+            episodes
+            status
+            averageScore
+            duration
+            genres
+            siteUrl
+            description
+            startDate {
+              year
+              month
+              day
+            }
+          }
+        }
+      `;
+
+      const variables = {
+        id: parseInt(id)
+      };
+
+      const response = await axios.post(
+        'https://graphql.anilist.co',
+        { query, variables },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+
+      setAnime(response.data.data.Media);
     } catch (error) {
       console.error('Error fetching anime details', error);
     } finally {
@@ -24,7 +61,7 @@ const AnimeDetails = () => {
     fetchAnimeDetails();
   }, [id]);
 
-  // 💡 Inject mobile responsive styles
+  // 💡 Mobile responsive styles
   useEffect(() => {
     const style = document.createElement('style');
     style.innerHTML = `
@@ -61,35 +98,32 @@ const AnimeDetails = () => {
 
       <div style={styles.detailsContainer} className="details-container">
         <img
-          src={anime.images.jpg.image_url}
-          alt={anime.title}
+          src={anime.coverImage.large}
+          alt={anime.title.english || anime.title.romaji}
           style={styles.image}
           className="anime-image"
         />
 
         <div style={styles.info} className="anime-info">
-          <h1 style={{ marginBottom: '1rem' }}>{anime.title}</h1>
-          <p><strong>Episodes:</strong> {anime.episodes}</p>
+          <h1 style={{ marginBottom: '1rem' }}>
+            {anime.title.english || anime.title.romaji}
+          </h1>
+          <p><strong>Episodes:</strong> {anime.episodes || 'N/A'}</p>
           <p><strong>Status:</strong> {anime.status}</p>
-          <p><strong>Score:</strong> {anime.score}</p>
-          <p><strong>Rating:</strong> {anime.rating}</p>
-          <p><strong>Duration:</strong> {anime.duration}</p>
-          <p><strong>Aired:</strong> {anime.aired.string}</p>
-          <p><strong>Broadcast:</strong> {anime.broadcast.string}</p>
+          <p><strong>Score:</strong> {anime.averageScore || 'N/A'}</p>
+          <p><strong>Duration:</strong> {anime.duration} min/ep</p>
+          <p><strong>Aired:</strong> {anime.startDate.year}-{anime.startDate.month}-{anime.startDate.day}</p>
+          <p><strong>Genres:</strong> {anime.genres.join(', ')}</p>
 
-          <p><strong>Genres:</strong> {' '}
-            {anime.genres.map(genre => genre.name).join(', ')}
-          </p>
-
-          <a href={anime.url} target="_blank" rel="noreferrer" style={styles.link}>
-            📖 View on MyAnimeList
+          <a href={anime.siteUrl} target="_blank" rel="noreferrer" style={styles.link}>
+            📖 View on AniList
           </a>
         </div>
       </div>
 
       <div style={styles.synopsis} className="anime-synopsis">
         <h2 style={{ marginBottom: '0.5rem' }}>Synopsis:</h2>
-        <p>{anime.synopsis}</p>
+        <p dangerouslySetInnerHTML={{ __html: anime.description }}></p>
       </div>
     </div>
   );
