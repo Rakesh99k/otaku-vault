@@ -1,36 +1,25 @@
+// src/pages/Watchlist.jsx
 import React from 'react';
 import { useSelector } from 'react-redux';
 import AnimeCard from '../components/AnimeCard';
 
 const Watchlist = () => {
-  const watchlist = useSelector((state) => state.watchlist.watchlist || []);
+  const watchlist = useSelector((state) => state.watchlist.list);
 
   return (
-    <div style={styles.container}>
-      <h2>Your Watchlist</h2>
-      {(!watchlist || watchlist.length === 0) ? (
-        <p style={{ marginTop: '1rem' }}>Your watchlist is empty. Add some anime!</p>
+    <div className="watchlist-page">
+      <h2>My Watchlist</h2>
+      {watchlist.length === 0 ? (
+        <p>Your watchlist is empty 😢</p>
       ) : (
-        <div style={styles.grid}>
+        <div className="anime-list">
           {watchlist.map((anime) => (
-            <AnimeCard key={anime.id} anime={anime} showAddButton={false} showRemoveButton={true} />
+            <AnimeCard key={anime.id} anime={anime} />
           ))}
         </div>
       )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    padding: '2rem',
-    color: '#fff'
-  },
-  grid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '1rem'
-  }
 };
 
 export default Watchlist;
