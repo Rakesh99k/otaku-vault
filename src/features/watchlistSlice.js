@@ -1,23 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
-  animeList: [],
-};
+// Load watchlist safely from localStorage
+let savedWatchlist = [];
+try {
+  const stored = localStorage.getItem('watchlist');
+  savedWatchlist = stored ? JSON.parse(stored) : [];
+} catch (error) {
+  console.error("Error parsing watchlist from localStorage:", error);
+  savedWatchlist = [];
+}
 
-export const watchlistSlice = createSlice({
+const watchlistSlice = createSlice({
   name: 'watchlist',
-  initialState,
+  initialState: {
+    list: savedWatchlist,
+  },
   reducers: {
     addToWatchlist: (state, action) => {
       const anime = action.payload;
-      const exists = state.animeList.find(item => item.id === anime.id);
-      if (!exists) {
-        state.animeList.push(anime);
+      const alreadyExists = state.list.some(item => item.id === anime.id);
+
+      if (!alreadyExists && anime.id) {
+        state.list.push(anime);
+        localStorage.setItem('watchlist', JSON.stringify(state.list));
       }
     },
     removeFromWatchlist: (state, action) => {
-      const idToRemove = action.payload;
-      state.animeList = state.animeList.filter(item => item.id !== idToRemove);
+      state.list = state.list.filter(item => item.id !== action.payload);
+      localStorage.setItem('watchlist', JSON.stringify(state.list));
     },
   },
 });
