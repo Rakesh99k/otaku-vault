@@ -9,50 +9,39 @@ const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Reset search when "?reset=true" is in the URL
-    if (location.search.includes('reset=true')) {
-      setSearchTerm('');
-      setQueryTerm(''); // This triggers the fetch for default list
-      window.history.replaceState({}, '', location.pathname);
-    }
-  }, [location.search]);
-
-  useEffect(() => {
-    const fetchAnime = async () => {
-      const query = `
-        query ($search: String) {
-          Page(perPage: 48) {
-            media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
-              id
-              title {
-                romaji
-              }
-              coverImage {
-                large
-              }
+  // Fetch anime from AniList API
+  const fetchAnime = async (search = '') => {
+    const query = `
+      query ($search: String) {
+        Page(perPage: 48) {
+          media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+            id
+            title {
+              romaji
+            }
+            coverImage {
+              large
             }
           }
         }
-      `;
+      }
+    `;
 
-      const variables = {
-        search: queryTerm || undefined,
-      };
-
-      const response = await fetch("https://graphql.anilist.co", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, variables }),
-      });
-
-      const { data } = await response.json();
-      setAnimeList(data.Page.media);
+    const variables = {
+      search: search || undefined,
     };
 
-    fetchAnime();
-  }, [queryTerm]); // 👈 Only depend on queryTerm
+    const response = await fetch("https://graphql.anilist.co", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables }),
+    });
 
+    const { data } = await response.json();
+    setAnimeList(data.Page.media);
+  };
+
+  // Handle search submit
   const handleSearch = (e) => {
     e.preventDefault();
     setQueryTerm(searchTerm.trim());
@@ -60,6 +49,24 @@ const Home = () => {
       navigate('/');
     }
   };
+
+  // Fetch anime when queryTerm changes
+  useEffect(() => {
+    fetchAnime(queryTerm);
+  }, [queryTerm]);
+
+  // Reset logic for Home navigation
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const shouldReset = params.get('reset') === 'true';
+
+    if (shouldReset) {
+      setSearchTerm('');
+      setQueryTerm('');
+      fetchAnime('');
+      navigate('/', { replace: true }); // Remove ?reset=true from URL
+    }
+  }, [location.search, navigate]);
 
   return (
     <div style={{ padding: '1rem' }}>
