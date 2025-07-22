@@ -1,0 +1,88 @@
+html, body, #root {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+.watchlist-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #111;
+  padding: 1rem;
+  box-sizing: border-box;
+  position: relative;
+  padding-top: 60px; /* Space for navbar */
+}
+
+.watchlist-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.watchlist-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: calc(100vh - 200px);
+}
+
+.watchlist-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  align-items: flex-start;
+}
+
+.anime-card {
+  max-height: 300px;
+  width: auto;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .watchlist-container {
+    padding: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.watchlist-title {
+  color: white;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.watchlist-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.watchlist-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 1rem 0;
+  flex: 1;
+}
+
+.watchlist-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 100%;
+}
+
+.watchlist-empty-text {
+  color: white;
+  font-size: 1.5rem;
+}

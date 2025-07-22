@@ -1,0 +1,33 @@
+.home-container {
+  padding: 1rem;
+  min-height: 100vh;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-search-form {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-search-input {
+  padding: 0.5rem;
+  width: 250px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-right: 0.5rem;
+}
+
+.home-search-button {
+  padding: 0.5rem 1rem;
+}
+
+.home-anime-list {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AnimeCard from '../components/AnimeCard';
+import './Home.css';
 
 const Home = () => {
   const [animeList, setAnimeList] = useState([]);
@@ -69,33 +70,27 @@ const Home = () => {
   }, [location.search, navigate]);
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <form onSubmit={handleSearch} style={{ marginBottom: '1rem' }}>
+    <div className="home-container">
+      <form onSubmit={handleSearch} className="home-search-form">
         <input
           type="text"
           placeholder="Search anime..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '0.5rem',
-            width: '250px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            marginRight: '0.5rem',
-          }}
+          className="home-search-input"
         />
-        <button type="submit" style={{ padding: '0.5rem 1rem' }}>
+        <button type="submit" className="home-search-button">
           Search
         </button>
       </form>
 
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="home-anime-list">
         {animeList.length > 0 ? (
           animeList.map((anime) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))
         ) : (
-          <p>No anime found.</p>
+          <p style={{ color: 'white' }}>No anime found.</p>
         )}
       </div>
     </div>
