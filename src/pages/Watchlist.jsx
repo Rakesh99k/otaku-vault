@@ -19,7 +19,7 @@ const Watchlist = () => {
         ) : (
           <div className="watchlist-empty">
             <p className="watchlist-empty-text">
-              Your watchlist is empty 😢
+              Your watchlist is empty !!
             </p>
           </div>
         )}
