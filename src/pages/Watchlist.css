@@ -9,11 +9,20 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #111;
-  padding: 1rem;
+  background: linear-gradient(120deg, #23243a 0%, #1a1a2e 100%);
+  padding: 2rem 1rem 1.5rem 1rem;
   box-sizing: border-box;
   position: relative;
-  padding-top: 60px; /* Space for navbar */
+  padding-top: 60px;
+}
+
+.watchlist-title {
+  color: #ffe082;
+  margin-bottom: 2.2rem;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .watchlist-content {
@@ -21,6 +30,20 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100%;
+}
+
+.watchlist-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  align-items: flex-start;
+}
+
+.anime-card {
+  max-height: 340px;
+  width: auto;
 }
 
 .watchlist-empty {
@@ -31,58 +54,19 @@ html, body, #root {
   min-height: calc(100vh - 200px);
 }
 
-.watchlist-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-  padding: 1rem 0;
-  align-items: flex-start;
+.watchlist-empty-text {
+  color: #ffe082;
+  font-size: 1.7rem;
+  text-align: center;
+  font-weight: 500;
+  background: linear-gradient(90deg, #ffe082 0%, #ff6e7f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.anime-card {
-  max-height: 300px;
-  width: auto;
-}
-
-/* Mobile-specific adjustments */
 @media (max-width: 768px) {
   .watchlist-container {
     padding: 0.5rem;
     -webkit-overflow-scrolling: touch;
   }
-}
-
-.watchlist-title {
-  color: white;
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.watchlist-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.watchlist-cards {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 1rem 0;
-  flex: 1;
-}
-
-.watchlist-empty {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 1;
-  min-height: 100%;
-}
-
-.watchlist-empty-text {
-  color: white;
-  font-size: 1.5rem;
 }

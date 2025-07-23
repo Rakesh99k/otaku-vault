@@ -1,33 +1,57 @@
 .home-container {
-  padding: 1rem;
+  padding: 2rem 1rem 1.5rem 1rem;
   min-height: 100vh;
-  background: #111;
+  background: linear-gradient(120deg, #23243a 0%, #1a1a2e 100%);
   display: flex;
   flex-direction: column;
 }
 
 .home-search-form {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 }
 
 .home-search-input {
-  padding: 0.5rem;
-  width: 250px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.7rem 1rem;
+  width: 270px;
+  border-radius: 8px;
+  border: 1.5px solid #ffe082;
   margin-right: 0.5rem;
+  font-size: 1.1rem;
+  background: #23243a;
+  color: #ffe082;
+  transition: border 0.2s;
+}
+
+.home-search-input:focus {
+  border: 2px solid #43cea2;
+  outline: none;
 }
 
 .home-search-button {
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.home-search-button:hover {
+  background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%);
+  color: #222;
 }
 
 .home-anime-list {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   flex-wrap: wrap;
   justify-content: center;
+  padding-bottom: 2rem;
 }
