@@ -4,20 +4,37 @@ import AnimeCard from '../components/AnimeCard';
 import './Home.css';
 
 const PER_PAGE = 25;
+const GENRES = [
+  'All',
+  'Action',
+  'Adventure',
+  'Comedy',
+  'Drama',
+  'Fantasy',
+  'Horror',
+  'Mystery',
+  'Romance',
+  'Sci-Fi',
+  'Slice of Life',
+  'Sports',
+  'Supernatural',
+  'Thriller',
+];
 
 const Home = () => {
   const [animeList, setAnimeList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [queryTerm, setQueryTerm] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Fetch anime from AniList API with pagination
-  const fetchAnime = async (search = '', page = 1) => {
+  // Fetch anime from AniList API with pagination and genre filter
+  const fetchAnime = async (search = '', page = 1, genre = 'All') => {
     const query = `
-      query ($search: String, $page: Int, $perPage: Int) {
+      query ($search: String, $page: Int, $perPage: Int, $genre: String) {
         Page(page: $page, perPage: $perPage) {
           pageInfo {
             total
@@ -25,7 +42,7 @@ const Home = () => {
             lastPage
             hasNextPage
           }
-          media(search: $search, type: ANIME, sort: POPULARITY_DESC) {
+          media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
             id
             title {
               romaji
@@ -42,6 +59,7 @@ const Home = () => {
       search: search || undefined,
       page,
       perPage: PER_PAGE,
+      genre: genre !== 'All' ? genre : undefined,
     };
 
     const response = await fetch('https://graphql.anilist.co', {
@@ -66,10 +84,16 @@ const Home = () => {
     }
   };
 
-  // Fetch anime when queryTerm or currentPage changes
+  // Handle genre change
+  const handleGenreChange = (e) => {
+    setSelectedGenre(e.target.value);
+    setCurrentPage(1); // Reset to first page on genre change
+  };
+
+  // Fetch anime when queryTerm, currentPage, or selectedGenre changes
   useEffect(() => {
-    fetchAnime(queryTerm, currentPage);
-  }, [queryTerm, currentPage]);
+    fetchAnime(queryTerm, currentPage, selectedGenre);
+  }, [queryTerm, currentPage, selectedGenre]);
 
   // Reset logic for Home navigation
   useEffect(() => {
@@ -79,13 +103,14 @@ const Home = () => {
     if (shouldReset) {
       setSearchTerm('');
       setQueryTerm('');
+      setSelectedGenre('All');
       setCurrentPage(1);
-      fetchAnime('', 1);
+      fetchAnime('', 1, 'All');
       navigate('/', { replace: true }); // Remove ?reset=true from URL
     }
   }, [location.search, navigate]);
 
-  // Pagination controls
+  // Pagination controls (unchanged)
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     const pages = [];
@@ -138,6 +163,20 @@ const Home = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="home-search-input"
         />
+        <div className="genre-select-wrapper">
+          <select
+            value={selectedGenre}
+            onChange={handleGenreChange}
+            className="home-genre-select"
+          >
+            {GENRES.map((genre) => (
+              <option key={genre} value={genre}>{genre}</option>
+            ))}
+          </select>
+          <span className="genre-select-arrow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </div>
         <button type="submit" className="home-search-button">
           Search
         </button>

@@ -95,3 +95,40 @@
   box-shadow: 0 4px 16px rgba(255,224,130,0.18);
   cursor: default;
 }
+
+.genre-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.home-genre-select {
+  margin: 0 0.5rem;
+  padding: 0.5rem 2rem 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid #ffe082;
+  background: #23243a;
+  color: #ffe082;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: border 0.2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.home-genre-select:focus {
+  border: 2px solid #43cea2;
+}
+
+.genre-select-arrow {
+  pointer-events: none;
+  position: absolute;
+  right: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
