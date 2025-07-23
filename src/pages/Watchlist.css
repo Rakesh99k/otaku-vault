@@ -60,6 +60,7 @@ html, body, #root {
   text-align: center;
   font-weight: 500;
   background: linear-gradient(90deg, #ffe082 0%, #ff6e7f 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
