@@ -20,6 +20,19 @@
   -webkit-text-fill-color: transparent;
 }
 
+.navbar-logo-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo-img {
+  height: 2.8rem;
+  width: 2.8rem;
+  margin-right: 0.7rem;
+  object-fit: contain;
+  display: block;
+}
+
 .navbar-links a {
   color: #fff;
   margin-left: 1.5rem;
