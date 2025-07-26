@@ -10,11 +10,13 @@ const AnimeDetails = () => {
   const dispatch = useDispatch();
   const watchlist = useSelector((state) => state.watchlist.list);
   const [anime, setAnime] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const isInWatchlist = watchlist.some((item) => item.id === Number(id));
 
   useEffect(() => {
     const fetchAnimeDetails = async () => {
+      setIsLoading(true);
       const query = `
         query ($id: Int) {
           Media(id: $id, type: ANIME) {
@@ -42,14 +44,20 @@ const AnimeDetails = () => {
 
       const variables = { id: parseInt(id) };
 
-      const response = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables }),
-      });
+      try {
+        const response = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables }),
+        });
 
-      const { data } = await response.json();
-      setAnime(data.Media);
+        const { data } = await response.json();
+        setAnime(data.Media);
+      } catch (error) {
+        console.error('Error fetching anime details:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchAnimeDetails();
@@ -64,7 +72,23 @@ const AnimeDetails = () => {
     }
   };
 
-  if (!anime) return <p>Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="anime-details-container">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+        <div className="details-skeleton details-skeleton-title"></div>
+        <div className="details-skeleton details-skeleton-img"></div>
+        <div className="details-skeleton details-skeleton-text medium"></div>
+        <div className="details-skeleton details-skeleton-text short"></div>
+        <div className="details-skeleton details-skeleton-text short"></div>
+        <div className="details-skeleton details-skeleton-text short"></div>
+      </div>
+    );
+  }
+
+  if (!anime) return <p>Anime not found.</p>;
 
   return (
     <div className="anime-details-container">

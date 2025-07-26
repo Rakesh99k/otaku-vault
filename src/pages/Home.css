@@ -6,7 +6,30 @@
   flex-direction: column;
 }
 
+/* Progress bar for search */
+.search-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, #ffe082 0%, #ff6e7f 100%);
+  transition: width 0.3s ease;
+  border-radius: 0 0 8px 8px;
+}
+
+.search-progress.loading {
+  width: 100%;
+  animation: progress-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .home-search-form {
+  position: relative;
   margin-bottom: 2rem;
   display: flex;
   align-items: center;
@@ -48,12 +71,31 @@
   color: #222;
 }
 
+/* Page transition animations */
 .home-anime-list {
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
   justify-content: center;
   padding-bottom: 2rem;
+  transition: opacity 0.3s ease;
+}
+
+.home-anime-list.fade-out {
+  opacity: 0;
+}
+
+.home-anime-list.fade-in {
+  opacity: 1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.anime-card {
+  animation: fadeIn 0.4s ease-out;
 }
 
 .pagination-container {
