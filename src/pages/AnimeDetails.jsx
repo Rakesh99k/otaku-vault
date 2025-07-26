@@ -30,6 +30,12 @@ const AnimeDetails = () => {
             genres
             averageScore
             episodes
+            format
+            status
+            startDate { year month day }
+            endDate { year month day }
+            season
+            seasonYear
           }
         }
       `;
@@ -72,8 +78,11 @@ const AnimeDetails = () => {
         {isInWatchlist ? 'Remove' : <><span role="img" aria-label="heart">❤️</span> Watchlist</>}
       </button>
       <h2 className="anime-details-title">
-        {anime.title.romaji || anime.title.english}
+        {anime.title.english || anime.title.romaji}
       </h2>
+      {anime.title.english && anime.title.romaji && anime.title.english !== anime.title.romaji && (
+        <h3 className="anime-details-romaji">{anime.title.romaji}</h3>
+      )}
       <img
         src={anime.coverImage.large}
         alt={anime.title.romaji}
@@ -91,6 +100,21 @@ const AnimeDetails = () => {
       </p>
       <p className="anime-details-meta">
         <strong>Average Score:</strong> {anime.averageScore}
+      </p>
+      <p className="anime-details-meta">
+        <strong>Format:</strong> {anime.format}
+      </p>
+      <p className="anime-details-meta">
+        <strong>Status:</strong> {anime.status}
+      </p>
+      <p className="anime-details-meta">
+        <strong>Start Date:</strong> {anime.startDate?.year || ''}{anime.startDate?.month ? `-${anime.startDate.month}` : ''}{anime.startDate?.day ? `-${anime.startDate.day}` : ''}
+      </p>
+      <p className="anime-details-meta">
+        <strong>End Date:</strong> {anime.endDate?.year || ''}{anime.endDate?.month ? `-${anime.endDate.month}` : ''}{anime.endDate?.day ? `-${anime.endDate.day}` : ''}
+      </p>
+      <p className="anime-details-meta">
+        <strong>Season:</strong> {anime.season} {anime.seasonYear}
       </p>
     </div>
   );

@@ -36,11 +36,14 @@ const AnimeCard = ({ anime }) => {
           className="anime-card-img"
         />
         <h3
-          title={anime.title?.romaji}
+          title={anime.title?.english || anime.title?.romaji}
           className="anime-card-title"
         >
-          {anime.title?.romaji}
+          {anime.title?.english || anime.title?.romaji}
         </h3>
+        {anime.title?.english && anime.title?.romaji && anime.title.english !== anime.title.romaji && (
+          <div className="anime-card-romaji">{anime.title.romaji}</div>
+        )}
       </Link>
       <button
         onClick={handleWatchlistToggle}

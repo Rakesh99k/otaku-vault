@@ -58,6 +58,7 @@ const Home = () => {
               id
               title {
                 romaji
+                english
               }
               coverImage {
                 large

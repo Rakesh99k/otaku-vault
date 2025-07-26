@@ -48,6 +48,17 @@
   letter-spacing: 0.5px;
 }
 
+.anime-card-romaji {
+  margin-top: -0.4rem;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  font-size: 0.98rem;
+  color: #ffe082;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  opacity: 0.85;
+}
+
 .anime-card-btn {
   display: flex;
   align-items: center;
