@@ -2,12 +2,13 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToWatchlist, removeFromWatchlist } from '../features/watchlistSlice';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './AnimeCard.css';
 
 const AnimeCard = ({ anime }) => {
   const dispatch = useDispatch();
   const watchlist = useSelector((state) => state.watchlist.list);
+  const location = useLocation();
 
   const isInWatchlist = watchlist.some((item) => item.id === anime.id);
 
@@ -20,10 +21,13 @@ const AnimeCard = ({ anime }) => {
     }
   };
 
+  // Preserve search, genre, and page in the link
+  const detailsLink = `/details/${anime.id}${location.search}`;
+
   return (
     <div className="anime-card">
       <Link
-        to={`/details/${anime.id}`}
+        to={detailsLink}
         className="anime-card-link"
       >
         <img

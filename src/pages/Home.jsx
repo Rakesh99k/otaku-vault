@@ -22,15 +22,11 @@ const GENRES = [
 ];
 
 const Home = () => {
-  const [animeList, setAnimeList] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [queryTerm, setQueryTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
   const navigate = useNavigate();
+  const [animeList, setAnimeList] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const handleResize = () => {
@@ -40,91 +36,87 @@ const Home = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch anime from AniList API with pagination and genre filter
-  const fetchAnime = async (search = '', page = 1, genre = 'All') => {
-    const query = `
-      query ($search: String, $page: Int, $perPage: Int, $genre: String) {
-        Page(page: $page, perPage: $perPage) {
-          pageInfo {
-            total
-            currentPage
-            lastPage
-            hasNextPage
-          }
-          media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
-            id
-            title {
-              romaji
+  // Get params from URL
+  const params = new URLSearchParams(location.search);
+  const search = params.get('search') || '';
+  const genre = params.get('genre') || 'All';
+  const page = parseInt(params.get('page') || '1', 10);
+
+  // Fetch anime when params change
+  useEffect(() => {
+    const fetchAnime = async () => {
+      const query = `
+        query ($search: String, $page: Int, $perPage: Int, $genre: String) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo {
+              total
+              currentPage
+              lastPage
+              hasNextPage
             }
-            coverImage {
-              large
+            media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
+              id
+              title {
+                romaji
+              }
+              coverImage {
+                large
+              }
             }
           }
         }
-      }
-    `;
-
-    const variables = {
-      search: search || undefined,
-      page,
-      perPage: PER_PAGE,
-      genre: genre !== 'All' ? genre : undefined,
+      `;
+      const variables = {
+        search: search || undefined,
+        page,
+        perPage: PER_PAGE,
+        genre: genre !== 'All' ? genre : undefined,
+      };
+      const response = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+      const { data } = await response.json();
+      setAnimeList(data.Page.media);
+      setTotalPages(data.Page.pageInfo.lastPage);
     };
-
-    const response = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-    });
-
-    const { data } = await response.json();
-    setAnimeList(data.Page.media);
-    setCurrentPage(data.Page.pageInfo.currentPage);
-    setTotalPages(data.Page.pageInfo.lastPage);
-  };
+    fetchAnime();
+  }, [search, genre, page]);
 
   // Handle search submit
   const handleSearch = (e) => {
     e.preventDefault();
-    setQueryTerm(searchTerm.trim());
-    setCurrentPage(1); // Reset to first page on new search
-    if (location.pathname !== '/') {
-      navigate('/');
-    }
+    const params = new URLSearchParams(location.search);
+    if (search) params.set('search', search);
+    else params.delete('search');
+    params.set('page', 1);
+    navigate({ pathname: '/', search: params.toString() });
   };
 
   // Handle genre change
   const handleGenreChange = (e) => {
-    setSelectedGenre(e.target.value);
-    setCurrentPage(1); // Reset to first page on genre change
+    const params = new URLSearchParams(location.search);
+    const value = e.target.value;
+    if (value && value !== 'All') params.set('genre', value);
+    else params.delete('genre');
+    params.set('page', 1);
+    navigate({ pathname: '/', search: params.toString() });
   };
 
-  // Fetch anime when queryTerm, currentPage, or selectedGenre changes
-  useEffect(() => {
-    fetchAnime(queryTerm, currentPage, selectedGenre);
-  }, [queryTerm, currentPage, selectedGenre]);
-
-  // Reset logic for Home navigation
-  useEffect(() => {
+  // Handle page change
+  const handlePageChange = (newPage) => {
     const params = new URLSearchParams(location.search);
-    const shouldReset = params.get('reset') === 'true';
+    params.set('page', newPage);
+    navigate({ pathname: '/', search: params.toString() });
+  };
 
-    if (shouldReset) {
-      setSearchTerm('');
-      setQueryTerm('');
-      setSelectedGenre('All');
-      setCurrentPage(1);
-      fetchAnime('', 1, 'All');
-      navigate('/', { replace: true }); // Remove ?reset=true from URL
-    }
-  }, [location.search, navigate]);
-
-  // Pagination controls (unchanged)
+  // Pagination controls
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     const pages = [];
     const maxPagesToShow = isMobile ? 3 : 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
     if (endPage - startPage < maxPagesToShow - 1) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
@@ -133,9 +125,9 @@ const Home = () => {
       pages.push(
         <button
           key={i}
-          className={`pagination-btn${i === currentPage ? ' active' : ''}`}
-          onClick={() => setCurrentPage(i)}
-          disabled={i === currentPage}
+          className={`pagination-btn${i === page ? ' active' : ''}`}
+          onClick={() => handlePageChange(i)}
+          disabled={i === page}
         >
           {i}
         </button>
@@ -145,16 +137,16 @@ const Home = () => {
       <div className="pagination-container">
         <button
           className="pagination-btn"
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
         >
           Previous
         </button>
         {pages}
         <button
           className="pagination-btn"
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page === totalPages}
         >
           Next
         </button>
@@ -168,18 +160,24 @@ const Home = () => {
         <input
           type="text"
           placeholder="Search anime..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={search}
+          onChange={e => {
+            const params = new URLSearchParams(location.search);
+            if (e.target.value) params.set('search', e.target.value);
+            else params.delete('search');
+            params.set('page', 1);
+            navigate({ pathname: '/', search: params.toString() });
+          }}
           className="home-search-input"
         />
         <div className="genre-select-wrapper">
           <select
-            value={selectedGenre}
+            value={genre}
             onChange={handleGenreChange}
             className="home-genre-select"
           >
-            {GENRES.map((genre) => (
-              <option key={genre} value={genre}>{genre}</option>
+            {GENRES.map((g) => (
+              <option key={g} value={g}>{g}</option>
             ))}
           </select>
           <span className="genre-select-arrow">
