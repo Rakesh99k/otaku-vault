@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './AnimeDetails.css';
 
-const AnimeDetail = () => {
+const AnimeDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [anime, setAnime] = useState(null);
 
   useEffect(() => {
@@ -46,6 +47,9 @@ const AnimeDetail = () => {
 
   return (
     <div className="anime-details-container">
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        ← Back
+      </button>
       <h2 className="anime-details-title">
         {anime.title.romaji || anime.title.english}
       </h2>
@@ -71,4 +75,4 @@ const AnimeDetail = () => {
   );
 };
 
-export default AnimeDetail;
+export default AnimeDetails;
