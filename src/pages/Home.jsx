@@ -27,6 +27,7 @@ const Home = () => {
   const [animeList, setAnimeList] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,6 +46,7 @@ const Home = () => {
   // Fetch anime when params change
   useEffect(() => {
     const fetchAnime = async () => {
+      setIsLoading(true);
       const query = `
         query ($search: String, $page: Int, $perPage: Int, $genre: String) {
           Page(page: $page, perPage: $perPage) {
@@ -73,14 +75,20 @@ const Home = () => {
         perPage: PER_PAGE,
         genre: genre !== 'All' ? genre : undefined,
       };
-      const response = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables }),
-      });
-      const { data } = await response.json();
-      setAnimeList(data.Page.media);
-      setTotalPages(data.Page.pageInfo.lastPage);
+      try {
+        const response = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables }),
+        });
+        const { data } = await response.json();
+        setAnimeList(data.Page.media);
+        setTotalPages(data.Page.pageInfo.lastPage);
+      } catch (error) {
+        console.error('Error fetching anime:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchAnime();
   }, [search, genre, page]);
@@ -155,9 +163,17 @@ const Home = () => {
     );
   };
 
+  // Render skeleton cards while loading
+  const renderSkeletonCards = () => {
+    return Array.from({ length: PER_PAGE }, (_, index) => (
+      <AnimeCard key={`skeleton-${index}`} loading={true} />
+    ));
+  };
+
   return (
     <div className="home-container">
       <form onSubmit={handleSearch} className="home-search-form">
+        <div className={`search-progress${isLoading ? ' loading' : ''}`}></div>
         <input
           type="text"
           placeholder="Search anime..."
@@ -191,7 +207,9 @@ const Home = () => {
       </form>
 
       <div className="home-anime-list">
-        {animeList.length > 0 ? (
+        {isLoading ? (
+          renderSkeletonCards()
+        ) : animeList.length > 0 ? (
           animeList.map((anime) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))
