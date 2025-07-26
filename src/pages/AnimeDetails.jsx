@@ -72,8 +72,11 @@ const AnimeDetails = () => {
         {isInWatchlist ? 'Remove' : <><span role="img" aria-label="heart">❤️</span> Watchlist</>}
       </button>
       <h2 className="anime-details-title">
-        {anime.title.romaji || anime.title.english}
+        {anime.title.english || anime.title.romaji}
       </h2>
+      {anime.title.english && anime.title.romaji && anime.title.english !== anime.title.romaji && (
+        <h3 className="anime-details-romaji">{anime.title.romaji}</h3>
+      )}
       <img
         src={anime.coverImage.large}
         alt={anime.title.romaji}
