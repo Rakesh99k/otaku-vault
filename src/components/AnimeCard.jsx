@@ -46,7 +46,13 @@ const AnimeCard = ({ anime }) => {
         onClick={handleWatchlistToggle}
         className={`anime-card-btn${isInWatchlist ? ' in-watchlist' : ''}`}
       >
-        {isInWatchlist ? 'Remove' : 'Add to Watchlist'}
+        {isInWatchlist ? (
+          <>Remove</>
+        ) : (
+          <>
+            Watchlist <span role="img" aria-label="heart">❤️</span>
+          </>
+        )}
       </button>
     </div>
   );

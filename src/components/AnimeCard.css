@@ -49,6 +49,10 @@
 }
 
 .anime-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
   margin-top: 12px;
   padding: 0.5rem 0.8rem;
   width: 100%;
@@ -60,7 +64,7 @@
   font-size: 1rem;
   background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
   box-shadow: 0 2px 8px rgba(67,206,162,0.13);
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
 }
 
 .anime-card-btn:hover {
@@ -70,6 +74,7 @@
 
 .anime-card-btn.in-watchlist {
   background: linear-gradient(90deg, #e74c3c 0%, #fd746c 100%);
+  color: #fff;
 }
 
 .anime-card-btn.in-watchlist:hover {
