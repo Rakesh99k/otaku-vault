@@ -38,6 +38,22 @@ const AnimeDetails = () => {
             endDate { year month day }
             season
             seasonYear
+            characters(sort: ROLE, perPage: 10) {
+              edges {
+                role
+                node {
+                  id
+                  name {
+                    full
+                    native
+                  }
+                  image {
+                    large
+                  }
+                  description
+                }
+              }
+            }
           }
         }
       `;
@@ -140,6 +156,31 @@ const AnimeDetails = () => {
       <p className="anime-details-meta">
         <strong>Season:</strong> {anime.season} {anime.seasonYear}
       </p>
+      
+      {/* Characters Section */}
+      {anime.characters?.edges && anime.characters.edges.length > 0 && (
+        <div className="characters-section">
+          <h3 className="characters-title">Characters</h3>
+          <div className="characters-grid">
+            {anime.characters.edges.map(({ role, node: character }) => (
+              <div key={character.id} className="character-card">
+                <img
+                  src={character.image?.large}
+                  alt={character.name?.full}
+                  className="character-image"
+                />
+                <div className="character-info">
+                  <h4 className="character-name">{character.name?.full}</h4>
+                  <p className="character-role">{role}</p>
+                  {character.name?.native && (
+                    <p className="character-native">{character.name.native}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
