@@ -48,7 +48,22 @@
   letter-spacing: 0.5px;
 }
 
+.anime-card-romaji {
+  margin-top: -0.4rem;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  font-size: 0.98rem;
+  color: #ffe082;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  opacity: 0.85;
+}
+
 .anime-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
   margin-top: 12px;
   padding: 0.5rem 0.8rem;
   width: 100%;
@@ -60,7 +75,7 @@
   font-size: 1rem;
   background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
   box-shadow: 0 2px 8px rgba(67,206,162,0.13);
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
 }
 
 .anime-card-btn:hover {
@@ -70,9 +85,98 @@
 
 .anime-card-btn.in-watchlist {
   background: linear-gradient(90deg, #e74c3c 0%, #fd746c 100%);
+  color: #fff;
 }
 
 .anime-card-btn.in-watchlist:hover {
   background: linear-gradient(90deg, #fd746c 0%, #ff9068 100%);
   color: #fff;
+}
+
+/* Shimmer animation for loading cards */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.anime-card.loading {
+  background: linear-gradient(90deg, #23243a 0%, #1a1a2e 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.anime-card.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 224, 130, 0.1),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.anime-card-skeleton {
+  width: 100%;
+  height: 260px;
+  background: #2a2a3a;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.anime-card-skeleton-title {
+  width: 80%;
+  height: 20px;
+  background: #2a2a3a;
+  border-radius: 4px;
+  margin: 0.5rem auto;
+}
+
+.anime-card-skeleton-btn {
+  width: 100%;
+  height: 40px;
+  background: #2a2a3a;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+/* Heart beat animation for watchlist */
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.3); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.3); }
+  70% { transform: scale(1); }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.anime-card-btn.heart-beat {
+  animation: heartBeat 1s ease-in-out;
+}
+
+.anime-card-btn.checkmark-animation {
+  animation: checkmark 0.6s ease-out;
+}
+
+.anime-card-btn .heart-icon {
+  transition: transform 0.2s ease;
+}
+
+.anime-card-btn:hover .heart-icon {
+  transform: scale(1.1);
 }

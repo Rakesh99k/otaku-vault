@@ -22,15 +22,12 @@ const GENRES = [
 ];
 
 const Home = () => {
-  const [animeList, setAnimeList] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [queryTerm, setQueryTerm] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const location = useLocation();
   const navigate = useNavigate();
+  const [animeList, setAnimeList] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -97,45 +94,36 @@ const Home = () => {
   // Handle search submit
   const handleSearch = (e) => {
     e.preventDefault();
-    setQueryTerm(searchTerm.trim());
-    setCurrentPage(1); // Reset to first page on new search
-    if (location.pathname !== '/') {
-      navigate('/');
-    }
+    const params = new URLSearchParams(location.search);
+    if (search) params.set('search', search);
+    else params.delete('search');
+    params.set('page', 1);
+    navigate({ pathname: '/', search: params.toString() });
   };
 
   // Handle genre change
   const handleGenreChange = (e) => {
-    setSelectedGenre(e.target.value);
-    setCurrentPage(1); // Reset to first page on genre change
+    const params = new URLSearchParams(location.search);
+    const value = e.target.value;
+    if (value && value !== 'All') params.set('genre', value);
+    else params.delete('genre');
+    params.set('page', 1);
+    navigate({ pathname: '/', search: params.toString() });
   };
 
-  // Fetch anime when queryTerm, currentPage, or selectedGenre changes
-  useEffect(() => {
-    fetchAnime(queryTerm, currentPage, selectedGenre);
-  }, [queryTerm, currentPage, selectedGenre]);
-
-  // Reset logic for Home navigation
-  useEffect(() => {
+  // Handle page change
+  const handlePageChange = (newPage) => {
     const params = new URLSearchParams(location.search);
-    const shouldReset = params.get('reset') === 'true';
+    params.set('page', newPage);
+    navigate({ pathname: '/', search: params.toString() });
+  };
 
-    if (shouldReset) {
-      setSearchTerm('');
-      setQueryTerm('');
-      setSelectedGenre('All');
-      setCurrentPage(1);
-      fetchAnime('', 1, 'All');
-      navigate('/', { replace: true }); // Remove ?reset=true from URL
-    }
-  }, [location.search, navigate]);
-
-  // Pagination controls (unchanged)
+  // Pagination controls
   const renderPagination = () => {
     if (totalPages <= 1) return null;
     const pages = [];
     const maxPagesToShow = isMobile ? 3 : 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let startPage = Math.max(1, page - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
     if (endPage - startPage < maxPagesToShow - 1) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
@@ -144,9 +132,9 @@ const Home = () => {
       pages.push(
         <button
           key={i}
-          className={`pagination-btn${i === currentPage ? ' active' : ''}`}
-          onClick={() => setCurrentPage(i)}
-          disabled={i === currentPage}
+          className={`pagination-btn${i === page ? ' active' : ''}`}
+          onClick={() => handlePageChange(i)}
+          disabled={i === page}
         >
           {i}
         </button>
@@ -156,16 +144,16 @@ const Home = () => {
       <div className="pagination-container">
         <button
           className="pagination-btn"
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
         >
           Previous
         </button>
         {pages}
         <button
           className="pagination-btn"
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page === totalPages}
         >
           Next
         </button>
@@ -173,24 +161,38 @@ const Home = () => {
     );
   };
 
+  // Render skeleton cards while loading
+  const renderSkeletonCards = () => {
+    return Array.from({ length: PER_PAGE }, (_, index) => (
+      <AnimeCard key={`skeleton-${index}`} loading={true} />
+    ));
+  };
+
   return (
     <div className="home-container">
       <form onSubmit={handleSearch} className="home-search-form">
+        <div className={`search-progress${isLoading ? ' loading' : ''}`}></div>
         <input
           type="text"
           placeholder="Search anime..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={search}
+          onChange={e => {
+            const params = new URLSearchParams(location.search);
+            if (e.target.value) params.set('search', e.target.value);
+            else params.delete('search');
+            params.set('page', 1);
+            navigate({ pathname: '/', search: params.toString() });
+          }}
           className="home-search-input"
         />
         <div className="genre-select-wrapper">
           <select
-            value={selectedGenre}
+            value={genre}
             onChange={handleGenreChange}
             className="home-genre-select"
           >
-            {GENRES.map((genre) => (
-              <option key={genre} value={genre}>{genre}</option>
+            {GENRES.map((g) => (
+              <option key={g} value={g}>{g}</option>
             ))}
           </select>
           <span className="genre-select-arrow">
@@ -203,7 +205,9 @@ const Home = () => {
       </form>
 
       <div className="home-anime-list">
-        {animeList.length > 0 ? (
+        {isLoading ? (
+          renderSkeletonCards()
+        ) : animeList.length > 0 ? (
           animeList.map((anime) => (
             <AnimeCard key={anime.id} anime={anime} />
           ))
