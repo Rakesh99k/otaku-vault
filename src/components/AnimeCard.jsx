@@ -16,7 +16,7 @@ const AnimeCard = ({ anime, loading = false }) => {
   const handleWatchlistToggle = (e) => {
     e.stopPropagation();
     
-    // Add animation class
+   
     const animationType = isInWatchlist ? 'checkmark-animation' : 'heart-beat';
     setAnimationClass(animationType);
     
