@@ -71,16 +71,27 @@ const Home = () => {
       genre: genre !== 'All' ? genre : undefined,
     };
 
-    const response = await fetch('https://graphql.anilist.co', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-    });
-
-    const { data } = await response.json();
-    setAnimeList(data.Page.media);
-    setCurrentPage(data.Page.pageInfo.currentPage);
-    setTotalPages(data.Page.pageInfo.lastPage);
+    try {
+      const response = await fetch('https://graphql.anilist.co', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, variables }),
+      });
+      const { data } = await response.json();
+      if (data && data.Page) {
+        setAnimeList(data.Page.media);
+        setCurrentPage(data.Page.pageInfo.currentPage);
+        setTotalPages(data.Page.pageInfo.lastPage);
+      } else {
+        setAnimeList([]);
+        setCurrentPage(1);
+        setTotalPages(1);
+      }
+    } catch (err) {
+      setAnimeList([]);
+      setCurrentPage(1);
+      setTotalPages(1);
+    }
   };
 
   // Handle search submit
