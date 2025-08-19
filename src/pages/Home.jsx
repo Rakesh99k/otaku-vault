@@ -37,59 +37,61 @@ const Home = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch anime from AniList API with pagination and genre filter
-  const fetchAnime = async (search = '', page = 1, genre = 'All') => {
-    const query = `
-      query ($search: String, $page: Int, $perPage: Int, $genre: String) {
-        Page(page: $page, perPage: $perPage) {
-          pageInfo {
-            total
-            currentPage
-            lastPage
-            hasNextPage
-          }
-          media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
-            id
-            title {
-              romaji
+  // Get params from URL
+  const params = new URLSearchParams(location.search);
+  const search = params.get('search') || '';
+  const genre = params.get('genre') || 'All';
+  const page = parseInt(params.get('page') || '1', 10);
+
+  // Fetch anime when params change
+  useEffect(() => {
+    const fetchAnime = async () => {
+      setIsLoading(true);
+      const query = `
+        query ($search: String, $page: Int, $perPage: Int, $genre: String) {
+          Page(page: $page, perPage: $perPage) {
+            pageInfo {
+              total
+              currentPage
+              lastPage
+              hasNextPage
             }
-            coverImage {
-              large
+            media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
+              id
+              title {
+                romaji
+                english
+              }
+              coverImage {
+                large
+              }
             }
           }
         }
-      }
-    `;
-
-    const variables = {
-      search: search || undefined,
-      page,
-      perPage: PER_PAGE,
-      genre: genre !== 'All' ? genre : undefined,
-    };
-
-    try {
-      const response = await fetch('https://graphql.anilist.co', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, variables }),
-      });
-      const { data } = await response.json();
-      if (data && data.Page) {
+      `;
+      const variables = {
+        search: search || undefined,
+        page,
+        perPage: PER_PAGE,
+        genre: genre !== 'All' ? genre : undefined,
+      };
+      try {
+        const response = await fetch('https://graphql.anilist.co', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables }),
+        });
+        const { data } = await response.json();
         setAnimeList(data.Page.media);
-        setCurrentPage(data.Page.pageInfo.currentPage);
         setTotalPages(data.Page.pageInfo.lastPage);
-      } else {
-        setAnimeList([]);
-        setCurrentPage(1);
-        setTotalPages(1);
+      } catch (error) {
+        console.error('Error fetching anime:', error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      setAnimeList([]);
-      setCurrentPage(1);
-      setTotalPages(1);
-    }
-  };
+    };
+    fetchAnime();
+  }, [search, genre, page]);
 
   // Handle search submit
   const handleSearch = (e) => {
