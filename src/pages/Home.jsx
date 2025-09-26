@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AnimeCard from '../components/AnimeCard';
 import './Home.css';
@@ -28,6 +28,8 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
+  const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -43,12 +45,44 @@ const Home = () => {
   const genre = params.get('genre') || 'All';
   const page = parseInt(params.get('page') || '1', 10);
 
+  // Initialize search input from URL
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Debounced search function
+  const debouncedSearch = useCallback((value) => {
+    console.log('Debounced search called with:', value);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+      searchTimeoutRef.current = setTimeout(() => {
+        console.log('Executing search for:', value);
+        const params = new URLSearchParams(location.search);
+        if (value) params.set('search', value);
+        else params.delete('search');
+        params.set('page', 1);
+        navigate({ pathname: '/home', search: params.toString() });
+      }, 500);
+  }, [location.search, navigate]);
+
   // Fetch anime when params change
   useEffect(() => {
     const fetchAnime = async () => {
+      console.log('Fetching anime with params:', { search, genre, page });
       setIsLoading(true);
       const query = `
-        query ($search: String, $page: Int, $perPage: Int, $genre: String) {
+        query ($search: String, $page: Int, $perPage: Int, $genre: [String]) {
           Page(page: $page, perPage: $perPage) {
             pageInfo {
               total
@@ -56,7 +90,12 @@ const Home = () => {
               lastPage
               hasNextPage
             }
-            media(search: $search, genre: $genre, type: ANIME, sort: POPULARITY_DESC) {
+            media(
+              search: $search
+              genre_in: $genre
+              type: ANIME
+              sort: POPULARITY_DESC
+            ) {
               id
               title {
                 romaji
@@ -69,12 +108,14 @@ const Home = () => {
           }
         }
       `;
+
       const variables = {
         search: search || undefined,
         page,
         perPage: PER_PAGE,
-        genre: genre !== 'All' ? genre : undefined,
+        genre: genre !== 'All' ? [genre] : undefined, // <-- FIX: array for genre_in
       };
+
       try {
         const response = await fetch('https://graphql.anilist.co', {
           method: 'POST',
@@ -96,11 +137,12 @@ const Home = () => {
   // Handle search submit
   const handleSearch = (e) => {
     e.preventDefault();
+    // Clear any pending debounced search
     const params = new URLSearchParams(location.search);
-    if (search) params.set('search', search);
+    if (searchInput) params.set('search', searchInput);
     else params.delete('search');
     params.set('page', 1);
-    navigate({ pathname: '/', search: params.toString() });
+    navigate({ pathname: '/home', search: params.toString() });
   };
 
   // Handle genre change
@@ -110,14 +152,14 @@ const Home = () => {
     if (value && value !== 'All') params.set('genre', value);
     else params.delete('genre');
     params.set('page', 1);
-    navigate({ pathname: '/', search: params.toString() });
+    navigate({ pathname: '/home', search: params.toString() });
   };
 
   // Handle page change
   const handlePageChange = (newPage) => {
     const params = new URLSearchParams(location.search);
     params.set('page', newPage);
-    navigate({ pathname: '/', search: params.toString() });
+    navigate({ pathname: '/home', search: params.toString() });
   };
 
   // Pagination controls
@@ -177,13 +219,11 @@ const Home = () => {
         <input
           type="text"
           placeholder="Search anime..."
-          value={search}
+          value={searchInput}
           onChange={e => {
-            const params = new URLSearchParams(location.search);
-            if (e.target.value) params.set('search', e.target.value);
-            else params.delete('search');
-            params.set('page', 1);
-            navigate({ pathname: '/', search: params.toString() });
+            const value = e.target.value;
+            setSearchInput(value);
+            debouncedSearch(value);
           }}
           className="home-search-input"
         />
